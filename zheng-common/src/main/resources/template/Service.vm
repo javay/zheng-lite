@@ -1,6 +1,6 @@
-package ${package_name}.rpc.api;
+package ${package_name}.service;
 
-import BaseService;
+import cn.javay.zheng.common.base.BaseService;
 import ${package_name}.dao.model.${model};
 import ${package_name}.dao.model.${model}Example;
 
