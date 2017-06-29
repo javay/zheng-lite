@@ -53,7 +53,9 @@ public class MybatisGeneratorUtil {
 		serviceImpl_vm = MybatisGeneratorUtil.class.getResource(serviceImpl_vm).getPath().replaceFirst("/", "");
 
 		String targetProject = module + "/" + module + "-dao";
-		String module_path = module + "/" + module + "-dao/src/main/resources/generatorConfig.xml";
+		String basePath = MybatisGeneratorUtil.class.getResource("/").getPath().replace("/target/classes/", "").replace(targetProject, "").replaceFirst("/", "");
+		String generatorConfig_xml = MybatisGeneratorUtil.class.getResource("/").getPath().replace("/target/classes/", "") + "/src/main/resources/generatorConfig.xml";
+		targetProject = basePath + targetProject;
 		String sql = "SELECT table_name FROM INFORMATION_SCHEMA.TABLES WHERE table_schema = '" + database + "' AND table_name LIKE '" + table_prefix + "_%';";
 
 		System.out.println("========== 开始生成generatorConfig.xml文件 ==========");
@@ -82,7 +84,7 @@ public class MybatisGeneratorUtil {
 			context.put("targetProject_sqlMap", targetProject);
 			context.put("generator_jdbc_password", AESUtil.AESDecode(jdbc_password));
 			context.put("last_insert_id_tables", last_insert_id_tables);
-			VelocityUtil.generate(generatorConfig_vm, module_path, context);
+			VelocityUtil.generate(generatorConfig_vm, generatorConfig_xml, context);
 			// 删除旧代码
 			deleteDir(new File(targetProject + "/src/main/java/" + package_name.replaceAll("\\.", "/") + "/dao/model"));
 			deleteDir(new File(targetProject + "/src/main/java/" + package_name.replaceAll("\\.", "/") + "/dao/mapper"));
@@ -93,7 +95,7 @@ public class MybatisGeneratorUtil {
 
 		System.out.println("========== 开始运行MybatisGenerator ==========");
 		List<String> warnings = new ArrayList<>();
-		File configFile = new File(module_path);
+		File configFile = new File(generatorConfig_xml);
 		ConfigurationParser cp = new ConfigurationParser(warnings);
 		Configuration config = cp.parseConfiguration(configFile);
 		DefaultShellCallback callback = new DefaultShellCallback(true);
@@ -106,8 +108,8 @@ public class MybatisGeneratorUtil {
 
 		System.out.println("========== 开始生成Service ==========");
 		String ctime = new SimpleDateFormat("yyyy/M/d").format(new Date());
-		String servicePath = module + "/" + module + "-service" + "/src/main/java/" + package_name.replaceAll("\\.", "/") + "/service";
-		String serviceImplPath = module + "/" + module + "-service" + "/src/main/java/" + package_name.replaceAll("\\.", "/") + "/service/impl";
+		String servicePath = basePath + module + "/" + module + "-service" + "/src/main/java/" + package_name.replaceAll("\\.", "/") + "/service";
+		String serviceImplPath = basePath + module + "/" + module + "-service" + "/src/main/java/" + package_name.replaceAll("\\.", "/") + "/service/impl";
 		for (int i = 0; i < tables.size(); i++) {
 			String model = StringUtil.lineToHump(ObjectUtils.toString(tables.get(i).get("table_name")));
 			String service = servicePath + "/" + model + "Service.java";
